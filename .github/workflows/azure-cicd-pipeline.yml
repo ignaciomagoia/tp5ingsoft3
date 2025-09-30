@@ -28,6 +28,14 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Build frontend
+        run: |
+          echo "🔨 Building React frontend..."
+          cd frontend
+          npm ci
+          npm run build
+          echo "✅ Frontend build completed"
+
       - name: Build application
         run: |
           echo "✅ Building application for Azure deployment..."
@@ -39,7 +47,7 @@ jobs:
           name: node-app
           path: |
             backend/
-            frontend/
+            frontend/build/
             package.json
             package-lock.json
             web.config
