@@ -51,7 +51,7 @@ jobs:
     needs: build
     environment:
       name: qa
-      url: https://tp05-app-qa-IgnacioJulian.azurewebsites.net
+      url: https://tp05-app-qa-ignaciojulian-e8cucrb5dqhdahaa.mexicocentral-01.azurewebsites.net
 
     steps:
       - name: Download artifact
@@ -59,11 +59,6 @@ jobs:
         with:
           name: node-app
           path: .
-
-      - name: List files (debug)
-        run: |
-          echo "📂 Files downloaded:"
-          ls -R
 
       - name: Install production dependencies
         run: npm ci --omit=dev
@@ -77,21 +72,21 @@ jobs:
           package: .
 
       - name: Wait for deployment
-        run: sleep 45
+        run: sleep 60
 
       - name: QA Health Check
         run: |
           echo "🏥 Running QA health check..."
-          for i in {1..5}; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" https://tp05-app-qa-IgnacioJulian.azurewebsites.net/api/health)
+          for i in {1..10}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://tp05-app-qa-ignaciojulian-e8cucrb5dqhdahaa.mexicocentral-01.azurewebsites.net/api/health)
             if [ $response -eq 200 ]; then
               echo "✅ QA Health check passed!"
               exit 0
             fi
-            echo "Attempt $i failed with status $response, retrying..."
-            sleep 10
+            echo "Attempt $i: status $response, retrying..."
+            sleep 15
           done
-          echo "❌ QA Health check failed after 5 attempts"
+          echo "❌ QA Health check failed after 10 attempts"
           exit 1
 
   # JOB 3: DEPLOY TO PRODUCTION (MANUAL)
@@ -101,7 +96,7 @@ jobs:
     needs: [build, deploy-qa]
     environment:
       name: production
-      url: https://tp05-app-prod-IgnacioJulian.azurewebsites.net
+      url: tp05-prod-ignaciojulian-bxa2g8gadyf8ehb9.mexicocentral-01.azurewebsites.net
 
     steps:
       - name: Download artifact
@@ -117,25 +112,25 @@ jobs:
         id: deploy-to-prod
         uses: azure/webapps-deploy@v2
         with:
-          app-name: tp05-app-prod-IgnacioJulian
+          app-name: tp05-prod-IgnacioJulian
           publish-profile: ${{ secrets.AZURE_PROD_PUBLISH_PROFILE }}
           package: .
 
       - name: Wait for deployment
-        run: sleep 45
+        run: sleep 60
 
       - name: Production Health Check
         run: |
           echo "🏥 Running PRODUCTION health check..."
-          for i in {1..5}; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" https://tp05-app-prod-IgnacioJulian.azurewebsites.net/api/health)
+          for i in {1..10}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" tp05-prod-ignaciojulian-bxa2g8gadyf8ehb9.mexicocentral-01.azurewebsites.net/api/health)
             if [ $response -eq 200 ]; then
               echo "✅ PRODUCTION Health check passed!"
               echo "🚀 Application successfully deployed to production!"
               exit 0
             fi
-            echo "Attempt $i failed with status $response, retrying..."
-            sleep 10
+            echo "Attempt $i: status $response, retrying..."
+            sleep 15
           done
-          echo "❌ PRODUCTION Health check failed after 5 attempts"
+          echo "❌ PRODUCTION Health check failed after 10 attempts"
           exit 1
