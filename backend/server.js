@@ -23,14 +23,12 @@ try {
     if (fs.existsSync(dbFilePath)) {
         const raw = fs.readFileSync(dbFilePath, 'utf-8');
         const parsed = JSON.parse(raw);
-        dbData = {
-            users: Array.isArray(parsed.users) && parsed.users.length > 0
-                ? parsed.users
-                : [
-                    { id: 1, name: 'Admin', role: 'admin' },
-                    { id: 2, name: 'User', role: 'user' }
-                ]
-        };
+        const fileUsers = Array.isArray(parsed.users) ? parsed.users : [];
+        const ensured = fileUsers.slice(0, 2);
+        while (ensured.length < 2) {
+            ensured.push({ id: ensured.length + 1, name: ensured.length === 0 ? 'Admin' : 'User', role: ensured.length === 0 ? 'admin' : 'user' });
+        }
+        dbData = { users: ensured };
     } else {
         dbData = {
             users: [
