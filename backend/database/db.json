@@ -1,10 +1,6 @@
-
 {
-    "users": [
-      {"id": 1, "name": "Test User", "environment": "qa"}
-    ],
-    "app_info": {
-      "version": "1.0.0",
-      "last_updated": "2025-01-01"
-  }
-  }
+  "users": [
+    { "id": 1, "name": "Alice", "role": "admin" },
+    { "id": 2, "name": "Bob", "role": "user" }
+  ]
+}
