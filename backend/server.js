@@ -72,7 +72,12 @@ app.get('/api/info', (req, res) => {
 
 // Usuarios (en memoria)
 app.get('/api/users', (req, res) => {
-    res.json(dbData.users);
+    const normalizedUsers = (dbData.users || []).map((u, idx) => ({
+        id: typeof u.id === 'number' ? u.id : idx + 1,
+        name: u.name || 'User',
+        role: u.role && String(u.role).trim() !== '' ? u.role : 'user'
+    }));
+    res.json(normalizedUsers);
 });
 
 app.post('/api/users', (req, res) => {
