@@ -78,7 +78,21 @@ app.get('/api/debug/db', (req, res) => {
 
 // Usuarios (en memoria)
 app.get('/api/users', (req, res) => {
-    const normalizedUsers = (dbData.users || []).map((u, idx) => ({
+    let sourceUsers = dbData.users;
+    try {
+        // Releer el archivo en cada request para evitar artefactos antiguos
+        if (fs.existsSync(dbFilePath)) {
+            const raw = fs.readFileSync(dbFilePath, 'utf-8');
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.users) && parsed.users.length > 0) {
+                sourceUsers = parsed.users;
+            }
+        }
+    } catch (e) {
+        console.error('Error leyendo db.json en /api/users:', e);
+    }
+
+    const normalizedUsers = (sourceUsers || []).map((u, idx) => ({
         id: typeof u.id === 'number' ? u.id : idx + 1,
         name: u.name || 'User',
         role: u.role && String(u.role).trim() !== '' ? u.role : 'user'
