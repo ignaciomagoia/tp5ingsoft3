@@ -68,6 +68,14 @@ app.get('/api/info', (req, res) => {
     });
 });
 
+// Endpoint de diagnóstico para validar contenido de la "BD"
+app.get('/api/debug/db', (req, res) => {
+  res.json({
+    filePath: dbFilePath,
+    users: dbData.users
+  });
+});
+
 // Usuarios (en memoria)
 app.get('/api/users', (req, res) => {
     const normalizedUsers = (dbData.users || []).map((u, idx) => ({
