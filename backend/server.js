@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 
 // CRÍTICO: Azure usa process.env.PORT
@@ -15,13 +16,38 @@ app.use(express.json());
 // Servir frontend estático (build de React)
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// Base de datos en memoria (sin archivos)
-let dbData = {
-    users: [
-        { id: 1, name: "Admin", role: "admin" },
-        { id: 2, name: "User", role: "user" }
-    ]
-};
+// Cargar "base de datos" desde archivo si existe, con fallback en memoria
+const dbFilePath = path.join(__dirname, 'database', 'db.json');
+let dbData;
+try {
+    if (fs.existsSync(dbFilePath)) {
+        const raw = fs.readFileSync(dbFilePath, 'utf-8');
+        const parsed = JSON.parse(raw);
+        dbData = {
+            users: Array.isArray(parsed.users) && parsed.users.length > 0
+                ? parsed.users
+                : [
+                    { id: 1, name: 'Admin', role: 'admin' },
+                    { id: 2, name: 'User', role: 'user' }
+                ]
+        };
+    } else {
+        dbData = {
+            users: [
+                { id: 1, name: 'Admin', role: 'admin' },
+                { id: 2, name: 'User', role: 'user' }
+            ]
+        };
+    }
+} catch (error) {
+    console.error('Error cargando db.json, usando datos por defecto:', error);
+    dbData = {
+        users: [
+            { id: 1, name: 'Admin', role: 'admin' },
+            { id: 2, name: 'User', role: 'user' }
+        ]
+    };
+}
 
 // Health Check Endpoint (CRÍTICO)
 app.get('/api/health', (req, res) => {
