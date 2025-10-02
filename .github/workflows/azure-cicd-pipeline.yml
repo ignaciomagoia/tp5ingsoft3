@@ -104,7 +104,7 @@ jobs:
     needs: [build, deploy-qa]
     environment:
       name: production
-      url: tp05-prod-ignaciojulian-bxa2g8gadyf8ehb9.mexicocentral-01.azurewebsites.net
+      url: https://tp05-prod-ignaciojulian-bxa2g8gadyf8ehb9.mexicocentral-01.azurewebsites.net
 
     steps:
       - name: Download artifact
@@ -115,6 +115,15 @@ jobs:
 
       - name: Install production dependencies
         run: npm ci --omit=dev
+
+      - name: Validate production publish profile secret
+        run: |
+          if [ -z "${{ secrets.AZURE_PROD_PUBLISH_PROFILE }}" ]; then
+            echo "❌ Falta el secret AZURE_PROD_PUBLISH_PROFILE."
+            echo "Crea el secret en GitHub: Settings → Secrets and variables → Actions → New repository secret"
+            echo "Nombre: AZURE_PROD_PUBLISH_PROFILE | Valor: contenido del Publish Profile del App Service de PRODUCCIÓN"
+            exit 1
+          fi
 
       - name: Deploy to Azure Web App Production
         id: deploy-to-prod
@@ -131,7 +140,7 @@ jobs:
         run: |
           echo "🏥 Running PRODUCTION health check..."
           for i in {1..10}; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" tp05-prod-ignaciojulian-bxa2g8gadyf8ehb9.mexicocentral-01.azurewebsites.net/api/health)
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://tp05-prod-ignaciojulian-bxa2g8gadyf8ehb9.mexicocentral-01.azurewebsites.net/api/health)
             if [ $response -eq 200 ]; then
               echo "✅ PRODUCTION Health check passed!"
               echo "🚀 Application successfully deployed to production!"
