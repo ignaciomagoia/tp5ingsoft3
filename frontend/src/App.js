@@ -35,7 +35,7 @@ function App() {
 
   return (
     <div className="App" style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
-      <h1>TP05 CI/CD - Producción</h1>
+      <h1>TP05 CI/CD </h1>
       {error && (
         <div style={{ background: '#ffd7d7', color: '#b00020', padding: 12, borderRadius: 8 }}>
           Error: {error}
